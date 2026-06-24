@@ -20,6 +20,12 @@
   libgbm,
   libxscrnsaver,
   libxv,
+  libxxf86vm,
+  lz4,
+  vulkan-loader,
+  libgcrypt,
+  libgpg-error,
+  libGL,
 }:
 
 let
@@ -27,11 +33,11 @@ let
     rec {
       x86_64-linux = {
         urlSuffix = "linux-x86_64.tar.gz";
-        hash = "sha256-A8JUYzEMQH1sEKYrKZ84QZAgYbz0OvpHa3t9RIUVE9c=";
+        hash = "sha256-MG1pCn3H9ztMlX2Vp97XoVF/icglIBv2Lft0psXlnlw=";
       };
       x86_64-darwin = {
         urlSuffix = "macos-universal.zip";
-        hash = "sha256-LSNvFL1ud/FkzNSGk17ZqN2debnqsjlVDHd4NBjTds0=";
+        hash = "";
       };
       aarch64-darwin = x86_64-darwin;
     }
@@ -40,7 +46,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "appflowy";
-  version = "0.11.9";
+  version = "0.12.5";
 
   src = fetchzip {
     url = "https://github.com/AppFlowy-IO/appflowy/releases/download/${finalAttrs.version}/AppFlowy-${finalAttrs.version}-${dist.urlSuffix}";
@@ -69,6 +75,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     libgbm
     libxscrnsaver
     libxv
+    libxxf86vm
+    lz4
+    vulkan-loader
+    libgcrypt
+    libgpg-error
   ];
 
   dontBuild = true;
@@ -103,7 +114,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     lib.optionalString stdenvNoCC.hostPlatform.isLinux ''
       # Add missing libraries to appflowy using the ones it comes with
       makeWrapper $out/opt/AppFlowy $out/bin/appflowy \
-        --set LD_LIBRARY_PATH "$out/opt/lib/" \
+        --set LD_LIBRARY_PATH "$out/opt/lib/:${lib.makeLibraryPath [ libGL ]}" \
         --prefix PATH : "${lib.makeBinPath [ xdg-user-dirs ]}"
     ''
     + lib.optionalString stdenvNoCC.hostPlatform.isDarwin ''
